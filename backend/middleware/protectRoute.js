@@ -6,17 +6,17 @@ const protectRoute = async (req, res, next) => {
         const token = req.cookies.jwt
 
         if (!token) {
-            res.status(400).json({ error: "Unauthorized - No Token Provided" })
+            return res.status(400).json({ error: "Unauthorized - No Token Provided" })
         }
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
         if (!decoded) {
-            res.status(400), json({ error: "Unauthorized - Invalid Token" })
+            return res.status(400), json({ error: "Unauthorized - Invalid Token" })
         }
 
         const user = await User.findById(decoded.userId).select("-password")
 
         if (!user) {
-            res.status(400).json({ error: "User not Found" })
+            return res.status(400).json({ error: "User not Found" })
         }
         req.user = user //  WE CAN THEN PASS THIS req.user  TO THE MESSAGE CONTROLLER
         next();
