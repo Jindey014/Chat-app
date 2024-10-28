@@ -5,6 +5,7 @@ import authRoutes from './routes/authRoutes.js'
 import messageRoutes from './routes/messageRoutes.js'
 import userRoutes from './routes/userRoutes.js'
 import connectDB from './db/connectDB.js'
+import cors from 'cors'
 import { app, server } from './socket/socket.js'
 
 // const app = express()
@@ -14,6 +15,7 @@ const PORT = process.env.PORT || 5000;
 dotenv.config()
 app.use(express.json())//to parse the icoming requests with JSON parloads frorm req.body
 app.use(cookieParser())
+
 
 app.use("/api/auth", authRoutes)
 app.use("/api/messages", messageRoutes)

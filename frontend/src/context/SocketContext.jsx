@@ -1,7 +1,12 @@
-import { createContext, useState, useEffect } from 'react'
+import { createContext, useState, useEffect, useContext } from 'react'
 import { useAuthContext } from './AuthContext'
+import io from 'socket.io-client'
 
-export const SocketContext = createContext()
+const SocketContext = createContext()
+
+export const useSocketContext = () => {
+  return useContext(SocketContext)
+}
 
 export const SocketContextProvider = ({ children }) => {
   const [socket, setSocket] = useState(null)
@@ -10,6 +15,31 @@ export const SocketContextProvider = ({ children }) => {
 
   const { authUser } = useAuthContext()
 
-  useEffect(() => {}, [])
-  return <SocketContext.Provider value={{}}>{children}</SocketContext.Provider>
+  useEffect(() => {
+    if (authUser) {
+      const socket = io('http://localhost:5000', {
+        query: {
+          userId: authUser._id,
+        },
+      }) //pass our backend url
+      setSocket(socket) // authenticated user xa bhane socket ma mathi ko socket value set garne
+
+      //socket.on() is used to listen to events . This can be used in both client and server side
+      socket.on('getOnlineUsers', (users) => {
+        setOnlineUsers(users)
+      })
+      return () => socket.close() // this  is the cleanup function which cleans up the socket when component is unmounted
+    } else {
+      //auth user xaina bhane socket connection close garne
+      if (socket) {
+        socket.close()
+        setSocket(null)
+      }
+    }
+  }, [authUser])
+  return (
+    <SocketContext.Provider value={{ socket, onlineUsers }}>
+      {children}
+    </SocketContext.Provider>
+  )
 }
